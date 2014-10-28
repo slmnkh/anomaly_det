@@ -1,0 +1,197 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>&lt;no title&gt; &mdash; anomaly_det 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="anomaly_det 1.0 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="index.html">anomaly_det 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <dl class="docutils">
+<dt>/*</dt>
+<dd><ul class="first simple">
+<li>save_each_users_transactions.cpp</li>
+<li></li>
+<li>Created on: Oct 7, 2014</li>
+<li>Author: root</li>
+</ul>
+<p class="last"><a href="#id1"><span class="problematic" id="id2">*</span></a>/</p>
+</dd>
+</dl>
+<p>#include &#8220;generate_user_transaction_records.h&#8221;</p>
+<p>using namespace std;</p>
+<p>void save_each_users_transactions(){</p>
+<blockquote>
+<div><p>ifstream all_transactions_stream;
+all_transactions_stream.open(&#8220;ordered_user_edges.txt&#8221;);
+string line;
+unsigned long outer_counter = 0;
+map&lt;unsigned long, list&lt;float&gt; &gt; user_transactions;
+while(getline(all_transactions_stream, line)){</p>
+<blockquote>
+<div><p>//            if(outer_counter &gt; 1000)
+//            break;</p>
+<blockquote>
+<div><p>outer_counter++;
+string word;
+stringstream liness(line);
+unsigned long counter = 0;
+float values[5];
+while(getline(liness, word, &#8216;,&#8217;)){</p>
+<blockquote>
+<div>values[counter] = atof(word.c_str());
+counter++;</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+<dl class="docutils">
+<dt>//                      cout &lt;&lt; word &lt;&lt; &#8221;, &#8221;;</dt>
+<dd><blockquote class="first">
+<div><p>}</p>
+<dl class="docutils">
+<dt>if(outer_counter % 1000 == 0){</dt>
+<dd>cout &lt;&lt; &#8220;transactions read : &#8221; &lt;&lt; outer_counter &lt;&lt; endl;</dd>
+</dl>
+<p>}
+user_transactions[(unsigned long)values[1]].push_back(values[4]);
+user_transactions[(unsigned long)values[2]].push_back(-values[4]);</p>
+</div></blockquote>
+<p>}
+outer_counter = 0;
+ofstream output_file;
+output_file.open(&#8220;all_users_transactions.txt&#8221;);
+for (map &lt;unsigned long, list&lt;float&gt; &gt;::iterator it = user_transactions.begin(); it != user_transactions.end(); it++){</p>
+<blockquote>
+<div><p>//ofstream single_file;
+//ostringstream ss;
+//ss &lt;&lt; &#8220;<a href="#id11"><span class="problematic" id="id12">user_</span></a>&#8221; &lt;&lt; it-&gt;first &lt;&lt; &#8220;transactions&#8221;;
+//string file_name = ss.str();
+//single_file.open(file_name.c_str());
+output_file &lt;&lt; it-&gt;first &lt;&lt; &#8221; : &#8221;;
+for(list&lt;float&gt;::iterator listit = it-&gt;second.begin(); listit != it-&gt;second.end(); listit++){</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>if(listit == it-&gt;second.end()){</dt>
+<dd>output_file &lt;&lt; <a href="#id3"><span class="problematic" id="id4">*</span></a>listit;
+// single_file &lt;&lt; <a href="#id5"><span class="problematic" id="id6">*</span></a>listit;</dd>
+</dl>
+<p>}
+else{</p>
+<blockquote>
+<div>output_file &lt;&lt; <a href="#id7"><span class="problematic" id="id8">*</span></a>listit &lt;&lt; &#8221;, &#8221;;
+//  single_file &lt;&lt; <a href="#id9"><span class="problematic" id="id10">*</span></a>listit &lt;&lt; &#8221;, &#8221;;</div></blockquote>
+<p>}</p>
+</div></blockquote>
+<p>}
+output_file &lt;&lt; endl;
+//      single_file.close();
+// if(outer_counter == 100)
+//break;
+if(outer_counter % 1000 == 0){</p>
+<blockquote>
+<div>cout &lt;&lt; &#8220;Done with writing user &#8221; &lt;&lt; it-&gt;first &lt;&lt; &#8221; to file.&#8221; &lt;&lt; endl;</div></blockquote>
+<p>}
+outer_counter++;</p>
+</div></blockquote>
+<p>}
+output_file.close();</p>
+<p>ofstream stats_stream;
+unsigned long total_trans = 0;
+list&lt;unsigned long&gt; user_data_stats;</p>
+<p>stats_stream.open(&#8220;stats.txt&#8221;);
+outer_counter = 0;
+for(map &lt;unsigned long, list&lt;float&gt; &gt;::iterator it = user_transactions.begin(); it != user_transactions.end(); it++){</p>
+<blockquote>
+<div><p>stats_stream &lt;&lt; it-&gt;first &lt;&lt; &#8221; : &#8221; &lt;&lt; it-&gt;second.size() &lt;&lt; endl;
+total_trans = total_trans + it-&gt;second.size();
+if(outer_counter % 1000 == 0){</p>
+<blockquote>
+<div>cout &lt;&lt; &#8220;added transactions for this number of users : &#8221; &lt;&lt; outer_counter &lt;&lt; endl;</div></blockquote>
+<p>}
+outer_counter++;</p>
+</div></blockquote>
+<p>}
+stats_stream.close();</p>
+<p class="last">cout &lt;&lt; &#8220;Total number of transactions : &#8221; &lt;&lt; total_trans &lt;&lt; endl;</p>
+</dd>
+</dl>
+<p>}</p>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/save_each_users_transactions.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="index.html">anomaly_det 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Salman Khokhar.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

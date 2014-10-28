@@ -1,0 +1,198 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>&lt;no title&gt; &mdash; anomaly_det 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="anomaly_det 1.0 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="index.html">anomaly_det 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <p>////=======================================================================
+//// Edited: 2014 October by Salman Khokhar
+////
+//// - The file reads bitcoin transaction data (user_edges.txt) to construct a graph
+//// - Format of user_edges.txt:
+////            Each line has 5 columns. In order : transaction id (unique), sender id, receiver id, amount in BTC, date and time
+////            The sender and receiver ids are not public hashes but unique user ids computed from the bitcoin tools provided with the data
+////            Note that the tools are not obsolete since they work on an older database version of bitcoin, so this data cannot be regenerated from the bitcoin blockchain
+//// - Graph is used to compute groups of nodes in strongly connected components
+//// - The purpose of identifying these nodes is to identify nodes involved in money laundering
+//// - The file saves the results in a file &#8220;componets.txt&#8221; each line of components.txt contains two numbers
+////            The first number is the node index, the second number is the index of the component that it belongs to
+////
+////=======================================================================</p>
+<p>////=======================================================================
+//// Original file: Copyright 2001 Jeremy G. Siek, Andrew Lumsdaine, Lie-Quan Lee,
+////
+//// Distributed under the Boost Software License, Version 1.0. (See
+//// accompanying file LICENSE_1_0.txt or copy at
+//// <a class="reference external" href="http://www.boost.org/LICENSE_1_0.txt">http://www.boost.org/LICENSE_1_0.txt</a>)
+////=======================================================================
+//
+//
+//
+//
+//</p>
+<p>#include &#8220;generate_user_transaction_records.h&#8221;</p>
+<p>using namespace std;
+using namespace boost;</p>
+<p>void get_SCCs()
+{</p>
+<blockquote>
+<div><p>typedef adjacency_list &lt; vecS, vecS, directedS &gt; Graph; // we use an adjacency list representation for a graph
+const unsigned long N = 6336769;
+unsigned long danger_counter = 0;
+Graph G(N);</p>
+<p>std::ifstream myReadFile;
+myReadFile.open(&#8220;ordered_user_edges.txt&#8221;); // side note: it does not matter here whether we read in &#8220;user_edges.txt&#8221; or &#8220;ordered_user_edges.txt
+unsigned long counter = 0;
+unsigned long outer_count = 0;
+string line;
+if (myReadFile.is_open()) {
+while (std::getline(myReadFile, line)) {</p>
+<blockquote>
+<div><p>std::stringstream ssline ( line );
+unsigned long values[3];
+counter = 0;
+string word;
+//    std::cout &lt;&lt; line &lt;&lt; std::endl;
+while (getline(ssline, word, &#8216;,&#8217;)){</p>
+<blockquote>
+<div>//        cout &lt;&lt; &#8220;Current line : &#8221; &lt;&lt; line &lt;&lt; endl;
+//        cout &lt;&lt; &#8220;Current word : &#8221; &lt;&lt; word &lt;&lt; endl;
+if (counter &gt; 2) break;
+values[counter] = atoi(word.c_str());
+counter++;</div></blockquote>
+<p>}</p>
+</div></blockquote>
+</div></blockquote>
+<dl class="docutils">
+<dt>//      std::cout&lt;&lt; values[0] &lt;&lt; &#8221;, &#8221; &lt;&lt; values[1] &lt;&lt; &#8221;, &#8221; &lt;&lt; values[2] &lt;&lt; std::endl;</dt>
+<dd><p class="first">outer_count++;
+if (values[1] &gt; N || values[2] &gt; N)</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>{</dt>
+<dd>cout &lt;&lt; &#8220;Danger&#8221;;
+danger_counter++;</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+<dl class="docutils">
+<dt>if (values[1]==values[2] || (values[1] &gt; N) || (values[2] &gt; N)){</dt>
+<dd>//          std::cout &lt;&lt; &#8220;same indices found heren&#8221;;
+continue;</dd>
+</dl>
+<p class="last">}
+add_edge(values[1], values[2], G);</p>
+</dd>
+<dt>//      std::cout &lt;&lt; &#8220;<strong>*******</strong> nn&#8221;;</dt>
+<dd><blockquote class="first">
+<div><dl class="docutils">
+<dt>if (outer_count % 100 == 0)</dt>
+<dd>cout &lt;&lt; outer_count &lt;&lt; &#8220;n&#8221;;</dd>
+</dl>
+</div></blockquote>
+<p class="last">cout &lt;&lt; &#8220;Done with error checking.&#8221;;
+cout &lt;&lt; endl &lt;&lt; &#8220;Danger counter : &#8221; &lt;&lt; danger_counter &lt;&lt; endl;
+myReadFile.close();</p>
+</dd>
+</dl>
+<p>//  t = clock() - t;
+//  std::cout &lt;&lt; &#8220;It took time : &#8221; &lt;&lt; t;</p>
+<blockquote>
+<div><p>vector&lt;unsigned long&gt; c(N);</p>
+<p>int num = strong_components(G, make_iterator_property_map(c.begin(), get(vertex_index, G), c[0]));</p>
+<p>cout &lt;&lt; &#8220;Total number of components: &#8221; &lt;&lt; num &lt;&lt; endl;
+vector &lt; unsigned long &gt;::iterator i;
+ofstream savefile;
+savefile.open (&#8220;components.txt&#8221;);
+for (i = c.begin(); i != c.end(); ++i){</p>
+<blockquote>
+<div>//std::cout &lt;&lt; &#8220;Vertex &#8221; &lt;&lt; i - c.begin()
+// &lt;&lt; &#8221; is in component &#8221; &lt;&lt; <a href="#id1"><span class="problematic" id="id2">*</span></a>i &lt;&lt; std::endl;
+savefile &lt;&lt; i - c.begin() &lt;&lt; &#8221;, &#8221; &lt;&lt; <a href="#id3"><span class="problematic" id="id4">*</span></a>i &lt;&lt; &#8220;n&#8221;;</div></blockquote>
+<p>}
+savefile.close();
+//cout &lt;&lt; &#8220;It took graph conn comp time : &#8221; &lt;&lt; t;</p>
+</div></blockquote>
+<p>}</p>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/get_SCCs.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="index.html">anomaly_det 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Salman Khokhar.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

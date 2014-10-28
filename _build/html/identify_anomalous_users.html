@@ -1,0 +1,294 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>&lt;no title&gt; &mdash; anomaly_det 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="anomaly_det 1.0 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="index.html">anomaly_det 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <p>//<strong>*******************************************************************************************</strong>
+//// Code written by Salman Khokhar, October 04, 2014 for a project proposal for UCF/ORNL
+//
+////Steps in code:
+//
+//// - Read the file : components.txt (Each line contains user id and component id to which user belongs, this file is written by main_boost.cpp)
+//// - Loop over each line in components.txt, add the user id to a list containing all users in the corresponding component id.
+//
+//// For debugging purposes, get the following maps ::
+//// conn_com_nodes : keys = connected component indices, vals = all users in compopnent
+//// histMap              : keys = sizes of connected components, vals = indices of connected components with this size
+//// histVals       : keys = sizes of connected components, vals = count of number of connected components with this size
+//
+//// - For sanity check, output each pair in map histVals into component_size_dist.txt, there should be a good distribution of groups of small sizes (larger than 1)
+//
+//// - Loop over all components in map conn_com_nodes, if they are smaller than 10, add the user indices in them to a list
+//// - output the list to a text file
+//
+////<strong>*******************************************************************************************</strong>
+//
+#include &#8220;generate_user_transaction_records.h&#8221;</p>
+<p>using namespace boost;
+using namespace std;</p>
+<p>float sum_up_positive(string line){</p>
+<blockquote>
+<div><p>string sub_line, word;
+int pos = line.find_first_of(&#8221;:&#8221;);
+sub_line = line.substr(pos+2);
+float pos_trans_sum = 0.0;
+stringstream liness(sub_line);
+while(getline(liness, word, &#8216;,&#8217;)){</p>
+<blockquote>
+<div><p>float temp = atof(word.c_str());
+if (atof(word.c_str()) &gt; 0)</p>
+<blockquote>
+<div>pos_trans_sum += temp;</div></blockquote>
+</div></blockquote>
+<p>}</p>
+<p>return pos_trans_sum;</p>
+</div></blockquote>
+<p>}</p>
+<dl class="docutils">
+<dt>float get_user_out_transactions(list&lt;string&gt; user_transaction_series, unsigned long user){</dt>
+<dd><p class="first">list&lt;string&gt;::iterator us_it;
+int found = 0;
+for(us_it = user_transaction_series.begin(); us_it != user_transaction_series.end(); us_it++){</p>
+<blockquote class="last">
+<div>string word;
+string line = <a href="#id1"><span class="problematic" id="id2">*</span></a>us_it;
+stringstream liness(line);
+getline(liness, word, &#8216;:&#8217;);</div></blockquote>
+</dd>
+<dt>//    cout &lt;&lt; line;</dt>
+<dd><blockquote class="first">
+<div><dl class="docutils">
+<dt>if(user == atol(word.c_str())){</dt>
+<dd>found = 1;
+break;</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+<p>}
+if(found == 1){</p>
+<blockquote>
+<div>float out_transactions = sum_up_positive(<a href="#id3"><span class="problematic" id="id4">*</span></a>us_it);
+return out_transactions;</div></blockquote>
+<p class="last">}
+return 0;</p>
+</dd>
+</dl>
+<p>}</p>
+<p>float get_SCC_transaction_total(list&lt;string&gt; user_transaction_series, list&lt;unsigned long&gt; curr_SCC){ // for a given list of nodes in one SCC, sum up all their transactions.</p>
+<blockquote>
+<div><p>list&lt;unsigned long&gt;::iterator node_in_SCC; // iterator over list of nodes in SCC
+float total_transactions = 0.0;
+for(node_in_SCC = curr_SCC.begin(); node_in_SCC != curr_SCC.end(); node_in_SCC++){</p>
+<blockquote>
+<div>// search for user in the list of all transaction series
+total_transactions += get_user_out_transactions(user_transaction_series, <a href="#id5"><span class="problematic" id="id6">*</span></a>node_in_SCC);</div></blockquote>
+<p>}
+return total_transactions;</p>
+</div></blockquote>
+<p>}</p>
+<p>void identify_anomalous_users()
+{
+//      int maxcomponent_index = 0; // this variable is only used for debugging purposes. may discard</p>
+<blockquote>
+<div>const unsigned long N = 6336769;
+map &lt; unsigned long, list&lt;unsigned long&gt; &gt; conn_com_nodes; // mapping between SCC numbers and nodes that the SCC contains. the list only stores node ids which are real numbers, so datatype float is not needed.
+ifstream myReadFile;</div></blockquote>
+<p>////    loop over the lines of the file components.txt and add each nodes index in its component index in array of lists (conn_com_nodes)
+//      myReadFile.open(args[1]);</p>
+<blockquote>
+<div><p>myReadFile.open(&#8220;components.txt&#8221;);
+unsigned long counter;
+cout &lt;&lt; &#8220;Starting file reading&#8221; &lt;&lt; endl;
+string line;
+if (myReadFile.is_open()) {</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>while (getline(myReadFile, line)) { // each line is two numbers. node id and SCC id</dt>
+<dd><p class="first">stringstream ssline ( line );
+string word;
+unsigned long values[2]; // 2 numbers per line
+int counter = 0;
+while (getline(ssline, word, &#8216;,&#8217;))</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>{</dt>
+<dd>values[counter] = (unsigned)atol(word.c_str());
+counter++;</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+<p class="last">//                  maxcomponent_index = max(maxcomponent_index, values[1]);
+conn_com_nodes[values[1]].push_back(values[0]); // this stores all users in the SCC number &#8220;values[1]&#8221; at the index &#8220;values[1]&#8221; of the map</p>
+</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+<p>}
+myReadFile.close();
+map&lt;unsigned long, list&lt;unsigned long&gt; &gt; histMap; // for each map key (size of SCC), the val list conatins the SCC ids that are of that size
+map&lt;unsigned long, unsigned long&gt; histVals; // for for each map key (size of SCC), the val is the number of SCCs that are of that size
+for (map &lt;unsigned long, list&lt;unsigned long&gt; &gt;::iterator it = conn_com_nodes.begin(); it != conn_com_nodes.end(); it++){</p>
+<blockquote>
+<div>//      cout &lt;&lt; &#8220;Size of &#8221; &lt;&lt; it-&gt;first &lt;&lt; &#8220;-th list : &#8221; &lt;&lt; it-&gt;second.size() &lt;&lt; endl;
+histMap[it-&gt;second.size()].push_back(it-&gt;first); //  for key value = current_SCC.size, add the SCC id to val</div></blockquote>
+<p>}
+for (map &lt;unsigned long, list&lt;unsigned long&gt; &gt;::iterator it = histMap.begin(); it != histMap.end(); it++){</p>
+<blockquote>
+<div>histVals[it-&gt;first] = it-&gt;second.size(); // for key value = current_SCC.size, set the number of SCCs in the associated list as val</div></blockquote>
+<p>}</p>
+<p>// <strong>**</strong> write out histogram to file
+ofstream component_dist_file;
+component_dist_file.open(&#8220;component_size_dist.txt&#8221;);
+for (map&lt;unsigned long, unsigned long&gt;::iterator it = histVals.begin(); it != histVals.end(); it++){</p>
+<blockquote>
+<div>component_dist_file &lt;&lt; it-&gt;first &lt;&lt; &#8221;, &#8221; &lt;&lt; it-&gt;second &lt;&lt; endl;</div></blockquote>
+<p>}
+component_dist_file.close();
+// <strong>******************************</strong></p>
+<p>ifstream all_users_file;
+all_users_file.open(&#8220;all_users_transactions.txt&#8221;);
+list&lt;string&gt; all_users_data;
+string user_line;
+while(getline(all_users_file, user_line)){</p>
+<blockquote>
+<div>all_users_data.push_back(user_line);</div></blockquote>
+<p>}</p>
+<p>// <strong>**</strong> check each SCC, if it passes, check, add its nodes to text file containing anomalous node ids
+ofstream anomalous_users;
+ofstream anomalous_SCCs;
+list&lt;unsigned long&gt; anomalous_user_list;
+anomalous_users.open(&#8220;anomalous_users.txt&#8221;);
+anomalous_SCCs.open(&#8220;anomalous_SCCs.txt&#8221;);
+int scc_counter = 0;
+for (map&lt;unsigned long, list&lt;unsigned long&gt; &gt;::iterator it = conn_com_nodes.begin(); it != conn_com_nodes.end(); it++){</p>
+<blockquote>
+<div><p>//      float transaction_amount = get_SCC_transaction_total(all_users_data, it-&gt;second);
+if (it-&gt;second.size() &lt;= 10 &amp;&amp; it-&gt;second.size() &gt; 1){</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>// if (transaction_amount &gt; 0.2){</dt>
+<dd><dl class="first docutils">
+<dt>for(list&lt;unsigned long&gt;::iterator user_it = it-&gt;second.begin(); user_it != it-&gt;second.end(); user_it++){</dt>
+<dd>anomalous_user_list.push_back(<a href="#id7"><span class="problematic" id="id8">*</span></a>user_it);
+anomalous_SCCs &lt;&lt; <a href="#id9"><span class="problematic" id="id10">*</span></a>user_it &lt;&lt; &#8221; &#8221;;</dd>
+</dl>
+<p class="last">}
+anomalous_SCCs &lt;&lt; endl;
+// }</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>}
+scc_counter++;
+cout &lt;&lt; &#8220;Done with SCC : &#8221; &lt;&lt; scc_counter &lt;&lt; &#8221; out of : &#8221; &lt;&lt; conn_com_nodes.size() &lt;&lt; &#8220;n&#8221;;</p>
+</div></blockquote>
+<p>}
+anomalous_SCCs.close();
+anomalous_user_list.sort();
+anomalous_user_list.unique();
+for(list&lt;unsigned long&gt;::iterator user_it = anomalous_user_list.begin(); user_it != anomalous_user_list.end(); user_it++){</p>
+<blockquote>
+<div>anomalous_users &lt;&lt; <a href="#id11"><span class="problematic" id="id12">*</span></a>user_it &lt;&lt; endl;</div></blockquote>
+<p>}
+anomalous_users.close();</p>
+<p>//      save_anomalous_transaction_histories(); // making a separate .cpp for this. to be called from main.</p>
+</div></blockquote>
+<p>}</p>
+<p>//
+//        void plotHistogram(){
+//
+//      IplImage* imgHistogram = cvCreateImage(cvSize(256, 50), 8, 1);
+//      cvRectangle(imgHistogram, cvPoint(0,0),cvPoint(256,50),CV_RGB(255,255,255),-1);
+//      int max_value = <a href="#id13"><span class="problematic" id="id14">*</span></a>(max_element(hist.begin(), hist.end()));
+//      for (int i = 0; i &lt; 256; ++i) {
+//      int val = hist[i];
+//      int nor = cvRound(val * 50 / max_value);
+//      cvLine(imgHistogram, cvPoint(i, 50), cvPoint(i, 50-nor), CV_RGB(0,0,0));
+//      }
+//      cvShowImage(&#8220;hist&#8221;, imgHistogram);
+//      cvReleaseImage(&amp;imgHistogram);
+//
+//}</p>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/identify_anomalous_users.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="index.html">anomaly_det 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Salman Khokhar.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

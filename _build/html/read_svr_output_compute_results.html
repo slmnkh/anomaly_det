@@ -1,0 +1,201 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>&lt;no title&gt; &mdash; anomaly_det 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="anomaly_det 1.0 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="index.html">anomaly_det 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <dl class="docutils">
+<dt>/*</dt>
+<dd><ul class="first simple">
+<li>read_svr_output_compute_results.cpp</li>
+<li></li>
+<li>Created on: Oct 11, 2014</li>
+<li>Author: root</li>
+</ul>
+<p class="last"><a href="#id1"><span class="problematic" id="id2">*</span></a>/</p>
+</dd>
+</dl>
+<p>#include &#8220;generate_user_transaction_records.h&#8221;</p>
+<p>using namespace std;</p>
+<p>void read_svr_output_compute_results(){</p>
+<blockquote>
+<div>ifstream anomalous_results;
+ifstream negative_results;
+anomalous_results.open(&#8220;anomalous_predictions.txt&#8221;);
+negative_results.open(&#8220;negative_predictions.txt&#8221;);
+string line;</div></blockquote>
+<p>//      vector&lt;pair&lt;float, int&gt; &gt; results_map;
+//      vector&lt;pair&lt;unsigned long, string&gt; &gt; timestamps;</p>
+<blockquote>
+<div><p>vector&lt;pair&lt;float, int&gt; &gt; results_map;
+int num_anomalous, num_negative;</p>
+<p>num_anomalous = 0;
+num_negative = 0;</p>
+<p>while(getline(anomalous_results, line)){</p>
+<blockquote>
+<div>list&lt;float&gt; values;
+string word;</div></blockquote>
+</div></blockquote>
+<dl class="docutils">
+<dt>//              cout &lt;&lt; &#8220;Testing line <span class="classifier-delimiter">:</span> <span class="classifier">&#8221; &lt;&lt; line &lt;&lt; endl &lt;&lt; endl ;</span></dt>
+<dd>stringstream liness(line);
+while(getline(liness, word, &#8216; &#8216;)){</dd>
+<dt>//                      cout &lt;&lt; &#8220;New word <span class="classifier-delimiter">:</span> <span class="classifier">&#8221; &lt;&lt; word &lt;&lt; endl;</span></dt>
+<dd><blockquote class="first">
+<div>values.push_back(atof(word.c_str()));</div></blockquote>
+<p>}
+float mean_error = 0;
+for(list&lt;float&gt;::iterator it = values.begin(); it != values.end(); it++){</p>
+<blockquote class="last">
+<div>mean_error = mean_error + <a href="#id3"><span class="problematic" id="id4">*</span></a>it;</div></blockquote>
+</dd>
+<dt>//                      cout &lt;&lt; <a href="#id5"><span class="problematic" id="id6">*</span></a>it &lt;&lt; endl;</dt>
+<dd>}</dd>
+<dt>//              cout &lt;&lt; mean_error &lt;&lt; endl;</dt>
+<dd>mean_error /= values.size();</dd>
+<dt>//              cout &lt;&lt; mean_error &lt;&lt; endl;</dt>
+<dd><blockquote class="first">
+<div>results_map.push_back(make_pair(mean_error, 1));
+num_anomalous++;</div></blockquote>
+<p>}</p>
+<p>while(getline(negative_results, line)){</p>
+<blockquote class="last">
+<div><p>list&lt;float&gt; values;
+string word;
+stringstream liness(line);
+while(getline(liness, word, &#8216; &#8216;)){</p>
+<blockquote>
+<div>values.push_back(atof(word.c_str()));</div></blockquote>
+<p>}
+float mean_error = 0;
+for(list&lt;float&gt;::iterator it = values.begin(); it != values.end(); it++){</p>
+<blockquote>
+<div>mean_error += <a href="#id7"><span class="problematic" id="id8">*</span></a>it;</div></blockquote>
+</div></blockquote>
+</dd>
+<dt>//                              cout &lt;&lt; <a href="#id9"><span class="problematic" id="id10">*</span></a>it &lt;&lt; endl;</dt>
+<dd>}</dd>
+<dt>//                      cout &lt;&lt; mean_error &lt;&lt; endl;</dt>
+<dd><blockquote class="first">
+<div>mean_error /= values.size();
+results_map.push_back(make_pair(mean_error, 0));
+num_negative++;</div></blockquote>
+<p>}</p>
+<p>ofstream pre_sort;
+pre_sort.open(&#8220;pre_sort_results.txt&#8221;);
+vector&lt;pair&lt;float, int&gt; &gt;::iterator res_it;
+for(res_it = results_map.begin(); res_it != results_map.end(); res_it++){</p>
+<blockquote>
+<div>pre_sort &lt;&lt; res_it-&gt;first &lt;&lt; &#8221; : &#8221; &lt;&lt; res_it-&gt;second &lt;&lt; endl;</div></blockquote>
+<p>}</p>
+<p>sort(results_map.begin(),results_map.end());//, greater&lt;float&gt;());</p>
+<p>ofstream post_sort;
+post_sort.open(&#8220;post_sort_results.txt&#8221;);
+for(res_it = results_map.begin(); res_it != results_map.end(); res_it++){</p>
+<blockquote>
+<div>post_sort &lt;&lt; res_it-&gt;first &lt;&lt; &#8221; : &#8221; &lt;&lt; res_it-&gt;second &lt;&lt; endl;</div></blockquote>
+<p>}</p>
+<p>cout &lt;&lt; &#8220;Length of results = &#8221; &lt;&lt; results_map.size() &lt;&lt; endl;</p>
+<p>int true_positives = 0;
+//for (int i = num_negative+1; i &lt; num_anomalous+num_negative; i++){</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>for(int i = 0; i &lt; num_anomalous; i++){</dt>
+<dd><dl class="first docutils">
+<dt>if (results_map[i].second == 1){</dt>
+<dd>true_positives++;
+cout &lt;&lt; &#8220;here.. : &#8221; &lt;&lt; true_positives &lt;&lt; endl;</dd>
+</dl>
+<p class="last">}</p>
+</dd>
+</dl>
+</div></blockquote>
+<p class="last">}
+cout &lt;&lt; endl;
+cout &lt;&lt; &#8220;Accuracy : &#8221; &lt;&lt; (float)true_positives/(float)num_anomalous*100 &lt;&lt; endl;</p>
+</dd>
+</dl>
+<p>//      ofstream print_results;</p>
+<p>}</p>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/read_svr_output_compute_results.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="index.html">anomaly_det 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Salman Khokhar.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

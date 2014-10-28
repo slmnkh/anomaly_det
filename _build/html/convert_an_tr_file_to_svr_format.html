@@ -1,0 +1,144 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>&lt;no title&gt; &mdash; anomaly_det 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="anomaly_det 1.0 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="index.html">anomaly_det 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <dl class="docutils">
+<dt>/*</dt>
+<dd><ul class="first simple">
+<li>convert_an_tr_file_to_svr_format.cpp</li>
+<li></li>
+<li>Created on: Oct 11, 2014</li>
+<li>Author: root</li>
+</ul>
+<p class="last"><a href="#id1"><span class="problematic" id="id2">*</span></a>/</p>
+</dd>
+</dl>
+<p>#include &#8220;generate_user_transaction_records.h&#8221;
+using namespace std;</p>
+<p>void convert_an_tr_file_to_svr_format(){</p>
+<blockquote>
+<div><p>ifstream in_file;
+ofstream out_file_training;
+ofstream out_file_testing;
+in_file.open(&#8220;anomalous_users_transactions.txt&#8221;);
+out_file_training.open(&#8220;anomalous_users_svr_training.txt&#8221;);
+out_file_testing.open(&#8220;anomalous_users_svr_testing.txt&#8221;);</p>
+<p>unsigned long outer_counter = 0;
+string line;</p>
+<p>while(getline(in_file, line)){</p>
+<blockquote>
+<div><p>string sub_line;
+int pos = line.find_first_of(&#8221;:&#8221;);
+sub_line = line.substr(pos+2);
+int string_length;
+string_length = count(sub_line.begin(), sub_line.end(), &#8216; &#8216;);
+if (string_length &lt; 5)</p>
+<blockquote>
+<div>continue;</div></blockquote>
+<p>outer_counter++;</p>
+</div></blockquote>
+</div></blockquote>
+<dl class="docutils">
+<dt>//              replace(sub_line.begin(), sub_line.end(), &#8216;,&#8217; , &#8216; &#8216;);</dt>
+<dd><blockquote class="first">
+<div><p>sub_line.erase(remove(sub_line.begin(), sub_line.end(), &#8216;,&#8217;), sub_line.end());
+if (outer_counter &lt; 1000){</p>
+<blockquote>
+<div>out_file_training &lt;&lt; sub_line &lt;&lt; endl; // &lt;&lt; endl;</div></blockquote>
+<dl class="docutils">
+<dt>}else{</dt>
+<dd>out_file_testing &lt;&lt; sub_line &lt;&lt; endl;// &lt;&lt; endl;</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+<p>}</p>
+<p class="last">in_file.close();
+out_file_training.close();
+out_file_testing.close();</p>
+</dd>
+</dl>
+<p>}</p>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/convert_an_tr_file_to_svr_format.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="index.html">anomaly_det 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Salman Khokhar.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>
