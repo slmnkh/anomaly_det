@@ -1,0 +1,10 @@
+#include <iostream>
+#include <map>
+#include <list>
+using namespace std;
+
+void get_list_histogram(list<unsigned long> in_list, string out_name){
+
+
+
+}

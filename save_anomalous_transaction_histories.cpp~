@@ -1,0 +1,50 @@
+///*
+// * save_anomalous_transaction_histories.cpp
+// *
+// *  Created on: Oct 6, 2014
+// *      Author: root
+// */
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <list>
+#include <map>
+#include <cstdlib>
+#include <cstring>
+using namespace std;
+
+void save_anomalous_transaction_histories(){
+
+  ifstream anomalous_users_stream; // read all anomalous nodes into a list "anomalous_users_list"
+  list<unsigned long> anomalous_users_list;
+  anomalous_users_stream.open("anomalous_users.txt");
+  string line;
+  while(anomalous_users_stream.good()){
+    getline(anomalous_users_stream, line);
+    anomalous_users_list.push_back(atol(line.c_str()));
+//		anomalous_users_list.push_back(stoi(line));
+  }
+  anomalous_users_stream.close();
+  ifstream all_user_transactions; // go through this file and save the lines that belong to anomalous users
+  all_user_transactions.open("all_users_transactions.txt");
+
+  map<unsigned long, string> anomalous_lines;
+  while(getline(all_user_transactions, line)){
+      
+      stringstream liness(line);
+      string word;
+      getline(liness, word, ',');
+      unsigned long user_id = atol(word.c_str());
+      list<unsigned long>::iterator i = find(anomalous_users_list.begin(), anomalous_users_list.end(), user_id);
+      if (i != anomalous_users_list.end())
+	anomalous_lines[user_id] = line;
+    }  
+    
+
+    ofstream out_file;
+    out_file.open("anomalous_users_transactions.txt");
+    for(map<unsigned long, string>::iterator it = anomalous_lines.begin, it != anomalous_lines.end(); it++)
+      out_file << it->second << endl;
+    
+}

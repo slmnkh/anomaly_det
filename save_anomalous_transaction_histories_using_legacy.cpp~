@@ -1,0 +1,7 @@
+
+
+#include "generate_user_transaction_records.h"
+
+void save_anomalous_transaction_histories_using_legacy(){
+
+}

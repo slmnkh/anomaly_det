@@ -1,0 +1,80 @@
+/*
+ * get_negative_testing_file.cpp
+ *
+ *  Created on: Oct 11, 2014
+ *      Author: root
+ */
+
+	// input : all_users_transactions.txt, anomalous_users.txt
+	// output : negative_users_svr_testing.txt
+	// read in the input text files and prepare file for svr testing.
+#include "generate_user_transaction_records.h"
+
+using namespace std;
+
+void get_negative_testing_file(){
+
+  unsigned long N = 315;//10000;
+	ifstream anomalous_users_stream; // read all anomalous nodes into a list "anomalous_users_list"
+	list<unsigned long> anomalous_users_list;
+	anomalous_users_stream.open("anomalous_users.txt");
+	string line;
+
+	while(anomalous_users_stream.good()){
+		getline(anomalous_users_stream, line);
+		anomalous_users_list.push_back(atol(line.c_str()));
+	//		anomalous_users_list.push_back(stoi(line));
+	}
+
+	cout << "Done reading anomalous_users file" << endl;
+	anomalous_users_stream.close();
+	ifstream all_user_transactions; // go through this file and save the lines that belong to anomalous users
+	all_user_transactions.open("all_users_transactions.txt");
+
+	map<unsigned long, string> negative_lines;
+
+	unsigned long outer_counter = 0;
+
+
+	while(getline(all_user_transactions, line)){
+
+		 int loc_marker = line.find_first_of(":");
+		 string word = line.substr(0,loc_marker-1);
+		 unsigned long user_id = atol(word.c_str());
+		 list<unsigned long>::iterator i;
+		 i = find(anomalous_users_list.begin(), anomalous_users_list.end(), user_id);
+		 int length_line = count(line.begin(), line.end(), ',');
+		 bool line_valid = length_line > 5 && length_line < 100;
+		 if (i == anomalous_users_list.end() && line_valid){ // if index not found, ie line is not anomalous
+	    	negative_lines[user_id] = line;
+	    	outer_counter++;
+	    	cout << "Outer counter values : " << outer_counter << endl;
+	    }
+    	if (outer_counter > N)
+    		break;
+	}
+
+	ofstream out_file;
+	out_file.open("negative_users_svr_testing.txt");
+
+	cout << "Done with reading negative lines, now writing to file... Size of list of lines : " << negative_lines.size() << endl;
+
+
+	outer_counter = 0;
+	for(map<unsigned long, string>::iterator map_it = negative_lines.begin(); map_it != negative_lines.end(); map_it++){
+
+		string svr_line = map_it->second;
+		string sub_line;
+		int pos = svr_line.find_first_of(":");
+		sub_line = svr_line.substr(pos+2);
+		sub_line.erase(remove(sub_line.begin(), sub_line.end(), ','), sub_line.end());
+		out_file << sub_line << endl; // << endl;
+		outer_counter++;
+		cout << "Written lines : " << outer_counter << endl;
+
+	}
+
+	out_file.close();
+
+
+}

@@ -1,0 +1,17 @@
+/*
+ * generate_user_transaction_records.h
+ *
+ *  Created on: Oct 6, 2014
+ *      Author: root
+ */
+
+#ifndef GENERATE_USER_TRANSACTION_RECORDS_H_
+#define GENERATE_USER_TRANSACTION_RECORDS_H_
+
+
+
+void save_anomalous_transaction_histories();
+void save_each_users_transactions();
+
+
+#endif /* GENERATE_USER_TRANSACTION_RECORDS_H_ */
